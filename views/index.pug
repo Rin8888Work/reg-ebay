@@ -1,0 +1,82 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title Product Information
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js")
+    script.
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+        }
+
+        function run() {
+            $("#loading").html("Đang tải...");
+            var baseLD = $('#baseLD').val();
+            var refreshIPLink = $('#refreshIPLink').val();
+            var wmCoookie = $('#wmCoookie').val();
+            $.get('/get', { baseLD: baseLD, refreshIPLink, wmCoookie }, function({isRefreshSuccess, data}) {
+                if(data){
+                var productInfoHtml = `
+                    <img class="thumbnail" src="${data.image}" alt="Product Image">
+                    <h1>${data.name}<button onclick="copyText('${data.name}')">Copy name</button></h1>
+                    <p>SKU: ${data.sku} <button onclick="copyText('${data.sku}')">Copy SKU</button></p>
+                    <dangerous-html>Description: ${data.description}</dangerous-html>
+                    <p>Brand: ${data.brand}</p>
+                    <p>Price: $${data.price} <button onclick="copyText('${data.price}')">Copy Price</button></p>
+                `;
+                $('#productInfo').html(productInfoHtml);
+                    }else{
+                $('#productInfo').html(`<span class="error">LẤY SẢN PHẨM KHÔNG THÀNH CÔNG. LẤY LẠI COOKIES WALMART</span>`);
+
+
+            }
+           
+            $('#isRefreshSuccess').html(isRefreshSuccess ? '<span class="success">Đổi IP thành công</span>' : '<span class="error">Đổi IP thất bại</span>');
+            $("#loading").html("");
+            });
+        }
+
+        function xoaanh(){
+            var baseLD = $('#baseLD').val();
+            $.get('/clear', { baseLD: baseLD }, function(data) {
+                console.log({data})
+            });
+            $('#resultClear').html(`<span>Xóa ảnh thành công trong ${baseLD}</span>`);
+
+        }
+
+    style.
+        img.thumbnail {
+        max-width: 100px;
+        max-height: 100px;
+        }
+        label,input{
+            margin-bottom: 10px;
+        }
+        #isRefreshSuccess span.success{
+            color: green;
+        }
+        #isRefreshSuccess span.error{
+            color: red;
+        }
+  body
+    
+    label(for="wmCoookie") Enter warlmart coookie:
+    input(type="text", id="wmCoookie", name="wmCoookie")
+    br
+    label(for="baseLD") Enter BaseLD:
+    input(type="text", id="baseLD", name="baseLD")
+    br
+    label(for="refreshIPLink") Enter refreshIPLink:
+    input(type="text", id="refreshIPLink", name="refreshIPLink")
+    br
+
+    button(onclick="run()") Get
+    br
+
+    button(onclick="xoaanh()") Xóa ảnh trong LD
+    #loading
+    #isRefreshSuccess
+    #resultClear
+    #productInfo
